@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
 import { 
   Building2, 
   ShoppingCart, 
@@ -9,17 +10,28 @@ import {
   FileText, 
   Clock,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare,
+  Eye
 } from "lucide-react"
 
 const BuyerDashboard = () => {
+  const { toast } = useToast()
+
+  const handleAction = (action: string) => {
+    toast({
+      title: "Feature Coming Soon",
+      description: `${action} feature is being developed. You'll be notified when it's ready!`,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Buyer Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Aditya Birla Group</p>
+          <p className="text-muted-foreground">Welcome back, Fresh Foods Co.</p>
         </div>
         <Badge variant="outline" className="bg-blue-50 border-blue-200">
           <Building2 className="h-3 w-3 mr-1" />
@@ -43,7 +55,7 @@ const BuyerDashboard = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Annual Volume</p>
-              <p className="font-medium">10,000+ Tons</p>
+              <p className="font-medium">500+ Tons</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Trust Score</p>
@@ -61,9 +73,9 @@ const BuyerDashboard = () => {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">2</div>
             <p className="text-xs text-muted-foreground">
-              3 urgent requirements
+              Early stage testing
             </p>
           </CardContent>
         </Card>
@@ -74,9 +86,9 @@ const BuyerDashboard = () => {
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹2.1L</div>
+            <div className="text-2xl font-bold">₹25K</div>
             <p className="text-xs text-muted-foreground">
-              Vs. traditional sourcing
+              Initial pilot savings
             </p>
           </CardContent>
         </Card>
@@ -87,9 +99,9 @@ const BuyerDashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">156</div>
+            <div className="text-2xl font-bold">12</div>
             <p className="text-xs text-muted-foreground">
-              +12 verified this month
+              Growing partner network
             </p>
           </CardContent>
         </Card>
@@ -100,9 +112,9 @@ const BuyerDashboard = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">3</div>
             <p className="text-xs text-muted-foreground">
-              Active agreements
+              Pilot phase contracts
             </p>
           </CardContent>
         </Card>
@@ -119,9 +131,8 @@ const BuyerDashboard = () => {
           <CardContent>
             <div className="space-y-4">
               {[
-                { product: "Premium Wheat", quantity: "2,000 kg", price: "₹22/kg", responses: 15, status: "Active" },
-                { product: "Basmati Rice", quantity: "1,500 kg", price: "₹45/kg", responses: 8, status: "Urgent" },
-                { product: "Organic Maize", quantity: "800 kg", price: "₹25/kg", responses: 12, status: "Closing Soon" },
+                { product: "Premium Wheat", quantity: "500 kg", price: "₹22/kg", responses: 3, status: "Active" },
+                { product: "Quality Rice", quantity: "300 kg", price: "₹28/kg", responses: 2, status: "New" },
               ].map((item, index) => (
                 <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
                   <div>
@@ -129,12 +140,22 @@ const BuyerDashboard = () => {
                     <p className="text-sm text-muted-foreground">{item.quantity} at max {item.price}</p>
                     <p className="text-xs text-muted-foreground">{item.responses} farmer responses</p>
                   </div>
-                  <Badge variant={item.status === "Active" ? "default" : 
-                                item.status === "Urgent" ? "destructive" : "secondary"}>
-                    {item.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={item.status === "Active" ? "default" : "secondary"}>
+                      {item.status}
+                    </Badge>
+                    <Button size="sm" variant="ghost" onClick={() => handleAction("View demand details")}>
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">Limited demand posts in beta phase</p>
+                <Button variant="outline" className="mt-2" onClick={() => handleAction("Post new demand")}>
+                  Post Your First Demand
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -148,9 +169,8 @@ const BuyerDashboard = () => {
           <CardContent>
             <div className="space-y-4">
               {[
-                { farmer: "Rajesh Kumar", location: "Haryana", match: "98%", product: "Wheat", trust: "4.8" },
-                { farmer: "Priya Sharma", location: "Punjab", match: "95%", product: "Rice", trust: "4.9" },
-                { farmer: "Suresh Patel", location: "Gujarat", match: "92%", product: "Maize", trust: "4.7" },
+                { farmer: "Rajesh Kumar", location: "Haryana", match: "95%", product: "Wheat", trust: "4.8" },
+                { farmer: "Priya Sharma", location: "Punjab", match: "88%", product: "Rice", trust: "4.6" },
               ].map((item, index) => (
                 <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
                   <div>
@@ -160,10 +180,18 @@ const BuyerDashboard = () => {
                   </div>
                   <div className="text-right">
                     <Badge variant="default" className="mb-1">{item.match} Match</Badge>
-                    <Button size="sm" variant="outline" className="block">View Profile</Button>
+                    <Button size="sm" variant="outline" className="block" onClick={() => handleAction("View farmer profile")}>
+                      View Profile
+                    </Button>
                   </div>
                 </div>
               ))}
+              <div className="text-center py-4 text-muted-foreground">
+                <p className="text-sm">More farmers joining daily!</p>
+                <Button variant="outline" className="mt-2" onClick={() => handleAction("Find more suppliers")}>
+                  Discover Suppliers
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -178,11 +206,12 @@ const BuyerDashboard = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { title: "Pending Approval", count: 3, icon: Clock, color: "text-orange-600" },
-              { title: "Active Contracts", count: 18, icon: CheckCircle, color: "text-green-600" },
-              { title: "Need Attention", count: 2, icon: AlertTriangle, color: "text-red-600" },
+              { title: "Draft Contracts", count: 1, icon: Clock, color: "text-orange-600" },
+              { title: "Active Contracts", count: 2, icon: CheckCircle, color: "text-green-600" },
+              { title: "Need Review", count: 0, icon: AlertTriangle, color: "text-red-600" },
             ].map((item, index) => (
-              <div key={index} className="flex items-center gap-3 p-4 rounded-lg border">
+              <div key={index} className="flex items-center gap-3 p-4 rounded-lg border cursor-pointer hover:bg-gray-50" 
+                   onClick={() => handleAction(`View ${item.title.toLowerCase()}`)}>
                 <item.icon className={`h-8 w-8 ${item.color}`} />
                 <div>
                   <p className="text-2xl font-bold">{item.count}</p>
@@ -194,11 +223,80 @@ const BuyerDashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Smart Contract Review Section */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-800">
+            <FileText className="h-5 w-5" />
+            Smart Contract Review
+          </CardTitle>
+          <CardDescription>AI-powered contract analysis and risk assessment</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[
+              { 
+                contract: "Wheat Supply Contract - Rajesh Kumar", 
+                status: "Pending Review", 
+                risk: "Low", 
+                terms: "500kg @ ₹22/kg, 7-day delivery",
+                aiScore: "96%"
+              },
+              { 
+                contract: "Rice Supply Agreement - Priya Sharma", 
+                status: "AI Approved", 
+                risk: "Very Low", 
+                terms: "300kg @ ₹28/kg, 5-day delivery",
+                aiScore: "98%"
+              }
+            ].map((item, index) => (
+              <div key={index} className="p-4 rounded-lg border bg-white">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="font-medium">{item.contract}</p>
+                    <p className="text-sm text-muted-foreground">{item.terms}</p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant={item.status === "AI Approved" ? "default" : "secondary"}>
+                      {item.status}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">AI Score: {item.aiScore}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    item.risk === "Low" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+                  }`}>
+                    Risk: {item.risk}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => handleAction("Review contract details")}>
+                      <Eye className="h-3 w-3 mr-1" />
+                      Review
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleAction("Chat with farmer")}>
+                      <MessageSquare className="h-3 w-3 mr-1" />
+                      Chat
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Quick Actions */}
-      <div className="flex gap-4">
-        <Button className="flex-1">Post New Demand</Button>
-        <Button variant="outline" className="flex-1">Review Contracts</Button>
-        <Button variant="outline" className="flex-1">Find Suppliers</Button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Button className="flex-1" onClick={() => handleAction("Post New Demand")}>
+          Post New Demand
+        </Button>
+        <Button variant="outline" className="flex-1" onClick={() => handleAction("Review Contracts")}>
+          Review Contracts
+        </Button>
+        <Button variant="outline" className="flex-1" onClick={() => handleAction("Find Suppliers")}>
+          Find Suppliers
+        </Button>
       </div>
     </div>
   )
