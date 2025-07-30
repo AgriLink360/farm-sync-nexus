@@ -7,9 +7,12 @@ import {
   ShoppingCart, 
   Package, 
   Settings,
-  User
+  User,
+  LogOut,
+  Home
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
 
 import {
   Sidebar,
@@ -49,6 +52,7 @@ export function AppSidebar() {
   const location = useLocation()
   const currentPath = location.pathname
   const collapsed = state === "collapsed"
+  const { user, profile, signOut } = useAuth()
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -106,33 +110,34 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Persona Switch */}
+        {/* User Info & Actions */}
         <SidebarGroup>
-          <SidebarGroupLabel>Switch Portal</SidebarGroupLabel>
+          <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {!collapsed && (
+                <SidebarMenuItem>
+                  <div className="px-3 py-2 text-sm">
+                    <div className="font-medium truncate">{profile?.full_name || user?.email}</div>
+                    <div className="text-xs text-muted-foreground capitalize">{profile?.portal_type} Portal</div>
+                  </div>
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/farmer" className={getNavCls}>
-                    <Tractor className="h-4 w-4" />
-                    {!collapsed && <span>Farmer</span>}
+                  <NavLink to="/" className={getNavCls}>
+                    <Home className="h-4 w-4" />
+                    {!collapsed && <span>Home</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink to="/buyer" className={getNavCls}>
-                    <Building2 className="h-4 w-4" />
-                    {!collapsed && <span>Buyer</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink to="/logistics" className={getNavCls}>
-                    <Truck className="h-4 w-4" />
-                    {!collapsed && <span>Logistics</span>}
-                  </NavLink>
+                <SidebarMenuButton 
+                  onClick={signOut} 
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full justify-start"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {!collapsed && <span>Sign Out</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

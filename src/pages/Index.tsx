@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Tractor, 
   Building2, 
@@ -11,10 +12,14 @@ import {
   Zap,
   TrendingUp,
   Users,
-  CheckCircle
+  CheckCircle,
+  LogIn,
+  UserPlus,
+  ArrowRight
 } from "lucide-react";
 
 const Index = () => {
+  const { user, profile, loading } = useAuth();
   const features = [
     {
       icon: Shield,
@@ -65,6 +70,17 @@ const Index = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -88,9 +104,41 @@ const Index = () => {
               <span className="font-semibold text-primary"> trust, intelligence, and autonomy</span> at its core.
             </p>
 
-            <div className="mt-8 text-sm text-muted-foreground">
+            <div className="mt-8 text-sm text-muted-foreground mb-8">
               <p className="font-medium">"Where Crops Meet Code" • "AgriCommerce Reimagined" • "Trust, Trade, and Tech for Farmers"</p>
             </div>
+
+            {/* Authentication Section */}
+            {!user ? (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/auth">
+                  <Button size="lg" className="text-lg px-8 py-4">
+                    <LogIn className="h-5 w-5 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-4">
+                    <UserPlus className="h-5 w-5 mr-2" />
+                    Create Account
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div>
+                <p className="text-lg text-muted-foreground mb-4">
+                  Welcome back, {profile?.full_name || user.email}!
+                </p>
+                {profile?.portal_type && (
+                  <Link to={`/${profile.portal_type}`}>
+                    <Button size="lg" className="text-lg px-8 py-4">
+                      Go to Dashboard
+                      <ArrowRight className="h-5 w-5 ml-2" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -117,41 +165,43 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Persona Selection */}
-      <div className="py-16 px-6 sm:px-12 lg:px-16 bg-gray-50">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Choose Your Portal</h2>
-            <p className="text-lg text-muted-foreground">
-              Select your role to access specialized features designed for your needs
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {personas.map((persona, index) => (
-              <Card key={index} className={`relative overflow-hidden border-0 shadow-xl bg-gradient-to-br ${persona.color} hover:shadow-2xl transition-all duration-300 hover:scale-105`}>
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <persona.icon className="h-8 w-8 text-primary" />
-                    <Badge variant="secondary">{persona.badge}</Badge>
-                  </div>
-                  <CardTitle className="text-xl">{persona.title}</CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    {persona.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link to={persona.link}>
-                    <Button className="w-full" size="lg">
-                      Enter Portal
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+      {/* Persona Selection - Show only for non-authenticated users */}
+      {!user && (
+        <div className="py-16 px-6 sm:px-12 lg:px-16 bg-gray-50">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Choose Your Portal</h2>
+              <p className="text-lg text-muted-foreground">
+                Select your role to access specialized features designed for your needs
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {personas.map((persona, index) => (
+                <Card key={index} className={`relative overflow-hidden border-0 shadow-xl bg-gradient-to-br ${persona.color} hover:shadow-2xl transition-all duration-300 hover:scale-105`}>
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <persona.icon className="h-8 w-8 text-primary" />
+                      <Badge variant="secondary">{persona.badge}</Badge>
+                    </div>
+                    <CardTitle className="text-xl">{persona.title}</CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      {persona.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Link to="/auth">
+                      <Button className="w-full" size="lg">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Stats Section */}
       <div className="py-16 px-6 sm:px-12 lg:px-16">
