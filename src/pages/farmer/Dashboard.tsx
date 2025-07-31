@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import NetworkMap from "@/components/NetworkMap"
+import AIChatbot from "@/components/AIChatbot"
 import { 
   Tractor, 
   Package, 
@@ -122,6 +124,22 @@ const FarmerDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Network Map Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Smart Network Connections
+          </CardTitle>
+          <CardDescription>
+            AI-powered visualization of buyer connections and logistics routes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <NetworkMap />
+        </CardContent>
+      </Card>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -283,6 +301,9 @@ const FarmerDashboard = () => {
           Update Profile
         </Button>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChatbot userType="farmer" />
     </div>
   )
 }

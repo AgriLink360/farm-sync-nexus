@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import NetworkMap from "@/components/NetworkMap"
+import AIChatbot from "@/components/AIChatbot"
 import { 
   Building2, 
   ShoppingCart, 
@@ -12,7 +14,8 @@ import {
   CheckCircle,
   AlertTriangle,
   MessageSquare,
-  Eye
+  Eye,
+  MapPin
 } from "lucide-react"
 
 const BuyerDashboard = () => {
@@ -119,6 +122,22 @@ const BuyerDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Supply Chain Map */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Supply Chain Network
+          </CardTitle>
+          <CardDescription>
+            Visualize your supplier network and logistics connections
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <NetworkMap />
+        </CardContent>
+      </Card>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -298,6 +317,9 @@ const BuyerDashboard = () => {
           Find Suppliers
         </Button>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChatbot userType="buyer" />
     </div>
   )
 }
