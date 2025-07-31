@@ -1,18 +1,22 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { 
   Tractor, 
   Building2, 
   Truck, 
-  MapPin,
-  Settings
+  MapPin
 } from 'lucide-react';
+
+// Fix for default markers in Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 interface NetworkNode {
   id: string;
@@ -30,184 +34,173 @@ interface NetworkNode {
 
 const NetworkMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [showTokenInput, setShowTokenInput] = useState(true);
+  const map = useRef<L.Map | null>(null);
   const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null);
 
-  // Sample network data
+  // Sample network data - Indian locations
   const networkNodes: NetworkNode[] = [
     {
       id: 'farmer1',
       type: 'farmer',
       name: 'Rajesh Kumar',
-      location: [77.2090, 28.6139], // Delhi area
+      location: [28.6139, 77.2090], // Delhi area (lat, lng for Leaflet)
       details: { crops: ['Wheat', 'Rice'], volume: '500kg', rating: 4.8 }
     },
     {
       id: 'farmer2', 
       type: 'farmer',
       name: 'Priya Sharma',
-      location: [75.3412, 31.1471], // Punjab
+      location: [31.1471, 75.3412], // Punjab
       details: { crops: ['Rice', 'Maize'], volume: '300kg', rating: 4.6 }
+    },
+    {
+      id: 'farmer3',
+      type: 'farmer', 
+      name: 'Amit Singh',
+      location: [26.9124, 75.7873], // Rajasthan
+      details: { crops: ['Cotton', 'Wheat'], volume: '800kg', rating: 4.5 }
     },
     {
       id: 'buyer1',
       type: 'buyer',
       name: 'Fresh Foods Co.',
-      location: [77.1025, 28.7041], // Gurgaon
+      location: [28.7041, 77.1025], // Gurgaon
       details: { demands: ['Premium Wheat', 'Quality Rice'], volume: '2000kg', rating: 4.9 }
+    },
+    {
+      id: 'buyer2',
+      type: 'buyer',
+      name: 'AgriMart Ltd.',
+      location: [19.0760, 72.8777], // Mumbai
+      details: { demands: ['Cotton', 'Organic Vegetables'], volume: '1500kg', rating: 4.7 }
     },
     {
       id: 'logistics1',
       type: 'logistics',
       name: 'Regional Transport',
-      location: [77.0000, 28.5000],
+      location: [28.5000, 77.0000], // NCR Region
       details: { services: ['Standard Transport', 'Express Delivery'], rating: 4.7 }
+    },
+    {
+      id: 'logistics2',
+      type: 'logistics',
+      name: 'AgriLogistics Pro',
+      location: [22.5726, 88.3639], // Kolkata
+      details: { services: ['Cold Storage', 'Premium Transport'], rating: 4.8 }
     }
   ];
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+  // Create custom icons for different node types
+  const createCustomIcon = (type: 'farmer' | 'buyer' | 'logistics') => {
+    const colors = {
+      farmer: '#22c55e',
+      buyer: '#3b82f6', 
+      logistics: '#8b5cf6'
+    };
 
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [77.0000, 28.5000],
-      zoom: 8
-    });
+    const emojis = {
+      farmer: '🌾',
+      buyer: '🏢',
+      logistics: '🚚'
+    };
 
-    map.current.on('load', () => {
-      addNetworkVisualization();
+    return L.divIcon({
+      html: `
+        <div style="
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: ${colors[type]};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          font-weight: bold;
+          color: white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          cursor: pointer;
+          border: 3px solid white;
+        ">
+          ${emojis[type]}
+        </div>
+      `,
+      className: 'custom-marker',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
   };
 
-  const addNetworkVisualization = () => {
-    if (!map.current) return;
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
 
-    // Add markers for each node
+    // Initialize map centered on India
+    map.current = L.map(mapContainer.current).setView([23.5937, 78.9629], 5);
+
+    // Add OpenStreetMap tiles (completely free)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map.current);
+
+    // Add markers for each network node
+    const markers: L.Marker[] = [];
     networkNodes.forEach(node => {
-      const el = document.createElement('div');
-      el.className = 'network-marker';
-      el.style.width = '40px';
-      el.style.height = '40px';
-      el.style.borderRadius = '50%';
-      el.style.cursor = 'pointer';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.fontSize = '16px';
-      el.style.fontWeight = 'bold';
-      el.style.color = 'white';
-      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+      const marker = L.marker(node.location, {
+        icon: createCustomIcon(node.type)
+      });
 
-      switch (node.type) {
-        case 'farmer':
-          el.style.backgroundColor = '#22c55e';
-          el.innerHTML = '🌾';
-          break;
-        case 'buyer':
-          el.style.backgroundColor = '#3b82f6';
-          el.innerHTML = '🏢';
-          break;
-        case 'logistics':
-          el.style.backgroundColor = '#8b5cf6';
-          el.innerHTML = '🚚';
-          break;
-      }
-
-      el.addEventListener('click', () => {
+      marker.on('click', () => {
         setSelectedNode(node);
       });
 
-      new mapboxgl.Marker(el)
-        .setLngLat(node.location)
-        .addTo(map.current!);
+      marker.bindPopup(`
+        <div class="p-2">
+          <h3 class="font-bold">${node.name}</h3>
+          <p class="text-sm text-gray-600">${node.type.charAt(0).toUpperCase() + node.type.slice(1)}</p>
+          ${node.details.rating ? `<p class="text-sm">⭐ ${node.details.rating}/5.0</p>` : ''}
+        </div>
+      `);
+
+      marker.addTo(map.current!);
+      markers.push(marker);
     });
 
-    // Add connection lines
+    // Add smart connection lines between nodes
     const connections = [
-      { from: networkNodes[0], to: networkNodes[2] }, // farmer1 to buyer1
-      { from: networkNodes[1], to: networkNodes[2] }, // farmer2 to buyer1
-      { from: networkNodes[2], to: networkNodes[3] }, // buyer1 to logistics1
+      { from: networkNodes[0], to: networkNodes[3], type: 'supply' }, // farmer1 to buyer1
+      { from: networkNodes[1], to: networkNodes[3], type: 'supply' }, // farmer2 to buyer1
+      { from: networkNodes[2], to: networkNodes[4], type: 'supply' }, // farmer3 to buyer2
+      { from: networkNodes[3], to: networkNodes[5], type: 'logistics' }, // buyer1 to logistics1
+      { from: networkNodes[4], to: networkNodes[6], type: 'logistics' }, // buyer2 to logistics2
     ];
 
-    connections.forEach((connection, index) => {
-      map.current!.addSource(`route${index}`, {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: [connection.from.location, connection.to.location]
-          }
-        }
+    connections.forEach(connection => {
+      const line = L.polyline([connection.from.location, connection.to.location], {
+        color: connection.type === 'supply' ? '#22c55e' : '#8b5cf6',
+        weight: 3,
+        opacity: 0.7,
+        dashArray: '10, 10'
       });
 
-      map.current!.addLayer({
-        id: `route${index}`,
-        type: 'line',
-        source: `route${index}`,
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#22c55e',
-          'line-width': 3,
-          'line-dasharray': [2, 2]
-        }
-      });
+      line.bindPopup(`
+        <div class="p-2">
+          <p class="font-medium">Smart Connection</p>
+          <p class="text-sm">${connection.from.name} → ${connection.to.name}</p>
+          <p class="text-xs text-gray-600">AI-matched ${connection.type}</p>
+        </div>
+      `);
+
+      line.addTo(map.current!);
     });
-  };
 
-  const handleTokenSubmit = () => {
-    if (mapboxToken) {
-      setShowTokenInput(false);
-      initializeMap();
-    }
-  };
-
-  if (showTokenInput) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Network Visualization Map
-          </CardTitle>
-          <CardDescription>
-            Enter your Mapbox public token to visualize the AgriLink360 network
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                type="password"
-                placeholder="Enter Mapbox public token"
-                value={mapboxToken}
-                onChange={(e) => setMapboxToken(e.target.value)}
-              />
-              <Button onClick={handleTokenSubmit}>
-                <Settings className="h-4 w-4 mr-2" />
-                Setup Map
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Get your token from{' '}
-              <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                mapbox.com
-              </a>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+    // Cleanup function
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -220,11 +213,14 @@ const NetworkMap = () => {
                 Smart Network Visualization
               </CardTitle>
               <CardDescription>
-                AI-powered connections between farmers, buyers, and logistics partners
+                AI-powered connections between farmers, buyers, and logistics partners using OpenStreetMap
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div ref={mapContainer} className="w-full h-96 rounded-lg" />
+              <div ref={mapContainer} className="w-full h-96 rounded-lg border" />
+              <div className="mt-4 text-xs text-muted-foreground">
+                🗺️ Powered by OpenStreetMap - Free and open-source mapping
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -280,7 +276,7 @@ const NetworkMap = () => {
                   {selectedNode.details.rating && (
                     <div>
                       <p className="font-medium">Rating:</p>
-                      <p className="text-sm text-muted-foreground">{selectedNode.details.rating}/5.0</p>
+                      <p className="text-sm text-muted-foreground">⭐ {selectedNode.details.rating}/5.0</p>
                     </div>
                   )}
                 </div>
@@ -289,23 +285,30 @@ const NetworkMap = () => {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Network Details</CardTitle>
-                <CardDescription>Click on any node to view details</CardDescription>
+                <CardTitle>Network Overview</CardTitle>
+                <CardDescription>Click on any marker to view details</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                    <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">🌾</div>
                     <span className="text-sm">Farmers ({networkNodes.filter(n => n.type === 'farmer').length})</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">🏢</div>
                     <span className="text-sm">Buyers ({networkNodes.filter(n => n.type === 'buyer').length})</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                    <div className="w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">🚚</div>
                     <span className="text-sm">Logistics ({networkNodes.filter(n => n.type === 'logistics').length})</span>
                   </div>
+                </div>
+                <div className="mt-4 p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    🔗 Green lines show supply connections<br/>
+                    🔗 Purple lines show logistics connections<br/>
+                    🤖 All connections are AI-optimized
+                  </p>
                 </div>
               </CardContent>
             </Card>
