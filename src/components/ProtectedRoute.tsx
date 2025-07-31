@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -12,13 +13,17 @@ const ProtectedRoute = ({ children, requiredPortal }: ProtectedRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('ProtectedRoute check:', { user, profile, loading, requiredPortal });
+    
     if (!loading) {
       if (!user) {
+        console.log('No user found, redirecting to auth');
         navigate('/auth');
         return;
       }
       
       if (requiredPortal && profile?.portal_type !== requiredPortal) {
+        console.log('Portal mismatch:', profile?.portal_type, 'required:', requiredPortal);
         navigate('/auth');
         return;
       }

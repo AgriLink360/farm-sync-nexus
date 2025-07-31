@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,53 +33,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth event:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile
+          // Defer profile fetching to prevent deadlock
           setTimeout(async () => {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            setProfile(profileData as Profile);
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .single();
+              
+              console.log('Profile data:', profileData);
+              setProfile(profileData as Profile);
+            } catch (error) {
+              console.error('Error fetching profile:', error);
+            }
+            setLoading(false);
           }, 0);
         } else {
           setProfile(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
-          .then(({ data: profileData }) => {
-            setProfile(profileData as Profile);
-            setLoading(false);
-          });
-      } else {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Initial session check:', session);
+        
+        if (session?.user) {
+          setSession(session);
+          setUser(session.user);
+          
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          console.log('Initial profile data:', profileData);
+          setProfile(profileData as Profile);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
         setLoading(false);
       }
-    });
+    };
+
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {
     try {
+      console.log('Signing out...');
       await supabase.auth.signOut({ scope: 'global' });
       setUser(null);
       setSession(null);

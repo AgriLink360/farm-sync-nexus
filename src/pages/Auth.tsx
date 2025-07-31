@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Sprout, Building2, Truck } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { User, Sprout, Building2, Truck, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -32,8 +33,6 @@ const Auth = () => {
         
         if (profile?.portal_type) {
           navigate(`/${profile.portal_type}`);
-        } else {
-          navigate('/');
         }
       }
     };
@@ -45,7 +44,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -54,32 +53,42 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
+            portal_type: portalType,
           }
         }
       });
 
       if (error) throw error;
 
-      if (data.user) {
-        // Update profile with portal type
+      if (data.user && !data.session) {
+        toast({
+          title: "Check your email",
+          description: "We've sent you a confirmation link to complete your registration.",
+        });
+      } else if (data.user && data.session) {
+        // User is automatically signed in, update profile
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ 
+          .upsert({ 
+            user_id: data.user.id,
+            email: data.user.email!,
             portal_type: portalType,
             full_name: fullName 
-          })
-          .eq('user_id', data.user.id);
+          });
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile error:', profileError);
+        }
 
         // Create sample orders for the user
         await createSampleOrders(data.user.id, portalType);
 
         toast({
           title: "Account created successfully!",
-          description: "Please check your email to verify your account.",
+          description: "Welcome to AgriLink360!",
         });
 
+        // Redirect to appropriate portal
         navigate(`/${portalType}`);
       }
     } catch (error: any) {
@@ -105,18 +114,28 @@ const Auth = () => {
 
       if (error) throw error;
 
-      if (data.user) {
+      if (data.user && data.session) {
         // Get user profile to determine portal
         const { data: profile } = await supabase
           .from('profiles')
-          .select('portal_type')
+          .select('portal_type, full_name')
           .eq('user_id', data.user.id)
           .single();
 
         if (profile?.portal_type) {
+          toast({
+            title: "Welcome back!",
+            description: `Signed in successfully as ${profile.full_name || data.user.email}`,
+          });
+          
+          // Redirect to appropriate portal
           navigate(`/${profile.portal_type}`);
         } else {
-          navigate('/');
+          toast({
+            title: "Profile incomplete",
+            description: "Please complete your profile setup.",
+            variant: "destructive",
+          });
         }
       }
     } catch (error: any) {
@@ -197,19 +216,27 @@ const Auth = () => {
     const orders = sampleOrders[portal as keyof typeof sampleOrders] || [];
     
     for (const order of orders) {
-      await supabase.from('orders').insert(order);
+      try {
+        await supabase.from('orders').insert(order);
+      } catch (error) {
+        console.error('Error creating sample order:', error);
+      }
     }
-  };
-
-  const portalIcons = {
-    farmer: Sprout,
-    buyer: Building2,
-    logistics: Truck
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Back to Home Button */}
+        <div className="mb-6">
+          <Link to="/">
+            <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-green-800 mb-2">AgriLink360</h1>
           <p className="text-gray-600">Join the smart agricultural commerce network</p>
@@ -232,9 +259,9 @@ const Auth = () => {
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="signin-email">Email</Label>
                     <Input
-                      id="email"
+                      id="signin-email"
                       type="email"
                       placeholder="Enter your email"
                       value={email}
@@ -243,9 +270,9 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="signin-password">Password</Label>
                     <Input
-                      id="password"
+                      id="signin-password"
                       type="password"
                       placeholder="Enter your password"
                       value={password}
@@ -262,9 +289,9 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
+                    <Label htmlFor="signup-fullname">Full Name</Label>
                     <Input
-                      id="fullName"
+                      id="signup-fullname"
                       type="text"
                       placeholder="Enter your full name"
                       value={fullName}
@@ -273,9 +300,9 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="signup-email">Email</Label>
                     <Input
-                      id="email"
+                      id="signup-email"
                       type="email"
                       placeholder="Enter your email"
                       value={email}
@@ -284,9 +311,9 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="signup-password">Password</Label>
                     <Input
-                      id="password"
+                      id="signup-password"
                       type="password"
                       placeholder="Create a password"
                       value={password}
