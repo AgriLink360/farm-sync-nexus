@@ -78,6 +78,12 @@ const Auth = () => {
 
         if (profileError) {
           console.error('Profile error:', profileError);
+          toast({
+            title: "Profile setup failed",
+            description: "There was an issue setting up your profile. Please try again.",
+            variant: "destructive",
+          });
+          return;
         }
 
         // Create sample orders for the user
@@ -116,11 +122,21 @@ const Auth = () => {
 
       if (data.user && data.session) {
         // Get user profile to determine portal
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('portal_type, full_name')
           .eq('user_id', data.user.id)
           .single();
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          toast({
+            title: "Profile error",
+            description: "Unable to fetch your profile. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
 
         if (profile?.portal_type) {
           toast({
@@ -133,7 +149,7 @@ const Auth = () => {
         } else {
           toast({
             title: "Profile incomplete",
-            description: "Please complete your profile setup.",
+            description: "Your portal type is not set. Please contact support.",
             variant: "destructive",
           });
         }
