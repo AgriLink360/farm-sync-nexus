@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import NetworkMap from "@/components/NetworkMap"
 import AIChatbot from "@/components/AIChatbot"
+import WeatherForecast from "@/components/WeatherForecast"
 import { 
   Tractor, 
   Package, 
@@ -140,6 +141,9 @@ const FarmerDashboard = () => {
           <NetworkMap />
         </CardContent>
       </Card>
+
+      {/* Weather Forecast & Crop Predictions */}
+      <WeatherForecast />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
