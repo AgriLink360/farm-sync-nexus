@@ -34,11 +34,11 @@ const BuyerDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Buyer Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Fresh Foods Co.</p>
+          <p className="text-muted-foreground">Welcome to your procurement portal</p>
         </div>
         <Badge variant="outline" className="bg-blue-50 border-blue-200">
           <Building2 className="h-3 w-3 mr-1" />
-          Verified Company
+          New Buyer
         </Badge>
       </div>
 

@@ -22,9 +22,18 @@ const ProtectedRoute = ({ children, requiredPortal }: ProtectedRouteProps) => {
         return;
       }
       
-      if (requiredPortal && profile?.portal_type !== requiredPortal) {
-        console.log('Portal mismatch:', profile?.portal_type, 'required:', requiredPortal);
-        navigate('/auth');
+      // If user exists but profile is incomplete (no portal_type), redirect to profile setup
+      // Exception: don't redirect if we're already on the profile setup page
+      if (user && (!profile?.portal_type) && window.location.pathname !== '/profile-setup') {
+        console.log('Profile incomplete, redirecting to profile setup');
+        navigate('/profile-setup');
+        return;
+      }
+      
+      // If a specific portal is required and user's portal doesn't match, redirect to their portal
+      if (requiredPortal && profile?.portal_type && profile.portal_type !== requiredPortal) {
+        console.log('Portal mismatch, redirecting to user portal:', profile.portal_type);
+        navigate(`/${profile.portal_type}`);
         return;
       }
     }
@@ -41,7 +50,24 @@ const ProtectedRoute = ({ children, requiredPortal }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user || (requiredPortal && profile?.portal_type !== requiredPortal)) {
+  // Don't render anything while redirecting
+  if (!user) {
+    return null;
+  }
+  
+  // For profile setup page, only require user to be logged in
+  if (window.location.pathname === '/profile-setup') {
+    if (!user) return null;
+    return <>{children}</>;
+  }
+  
+  // For other pages, require complete profile
+  if (!profile?.portal_type) {
+    return null;
+  }
+  
+  // For portal-specific pages, ensure user is on correct portal
+  if (requiredPortal && profile?.portal_type !== requiredPortal) {
     return null;
   }
 

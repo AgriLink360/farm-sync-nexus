@@ -34,11 +34,11 @@ const FarmerDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Farmer Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Rajesh Kumar</p>
+          <p className="text-muted-foreground">Welcome to your agricultural portal</p>
         </div>
         <Badge variant="outline" className="bg-green-50 border-green-200">
           <Star className="h-3 w-3 mr-1" />
-          Verified Farmer
+          New Farmer
         </Badge>
       </div>
 
@@ -51,22 +51,11 @@ const FarmerDashboard = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Farm Location</p>
-              <p className="font-medium flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                Haryana, India
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Farm Size</p>
-              <p className="font-medium">25 Acres</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Trust Score</p>
-              <p className="font-medium text-green-600">4.8/5.0</p>
-            </div>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">Complete your profile to build your Agri-ID</p>
+            <Button onClick={() => handleAction("Complete profile")}>
+              Complete Profile Setup
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -79,9 +68,9 @@ const FarmerDashboard = () => {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
-              Early stage startup - growing!
+              Ready to list your first crop
             </p>
           </CardContent>
         </Card>
@@ -92,9 +81,9 @@ const FarmerDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹85,000</div>
+            <div className="text-2xl font-bold">₹0</div>
             <p className="text-xs text-muted-foreground">
-              First transactions on platform
+              Start earning by listing crops
             </p>
           </CardContent>
         </Card>
@@ -105,9 +94,9 @@ const FarmerDashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
-              Growing network steadily
+              Connect with verified buyers
             </p>
           </CardContent>
         </Card>
@@ -118,9 +107,9 @@ const FarmerDashboard = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹18/kg</div>
+            <div className="text-2xl font-bold">--</div>
             <p className="text-xs text-muted-foreground">
-              +₹2 above market
+              Price data after first listing
             </p>
           </CardContent>
         </Card>
@@ -154,32 +143,14 @@ const FarmerDashboard = () => {
             <CardDescription>Your latest produce listings</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                { crop: "Wheat", quantity: "500 kg", price: "₹20/kg", status: "Active" },
-                { crop: "Rice", quantity: "300 kg", price: "₹25/kg", status: "Pledged" },
-                { crop: "Maize", quantity: "200 kg", price: "₹18/kg", status: "Sold" },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                  <div>
-                    <p className="font-medium">{item.crop}</p>
-                    <p className="text-sm text-muted-foreground">{item.quantity} at {item.price}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={item.status === "Active" ? "default" : 
-                                  item.status === "Pledged" ? "secondary" : "outline"}>
-                      {item.status}
-                    </Badge>
-                    <Button size="sm" variant="ghost" onClick={() => handleAction("View crop details")}>
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No Crop Listings Yet</h3>
+              <p className="text-muted-foreground mb-4">Start by listing your first crop to connect with buyers</p>
+              <Button onClick={() => handleAction("List New Crop")}>
+                List Your First Crop
+              </Button>
             </div>
-            <Button variant="outline" className="w-full mt-4" onClick={() => handleAction("View all crops")}>
-              View All Listings
-            </Button>
           </CardContent>
         </Card>
 
@@ -190,28 +161,13 @@ const FarmerDashboard = () => {
             <CardDescription>Smart pricing based on market data</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                { crop: "Wheat", current: "₹20/kg", suggested: "₹22/kg", trend: "up" },
-                { crop: "Rice", current: "₹25/kg", suggested: "₹24/kg", trend: "down" },
-                { crop: "Maize", current: "₹18/kg", suggested: "₹19/kg", trend: "up" },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                  <div>
-                    <p className="font-medium">{item.crop}</p>
-                    <p className="text-sm text-muted-foreground">Current: {item.current}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-medium ${item.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                      {item.suggested}
-                    </p>
-                    <p className="text-xs text-muted-foreground">AI Suggested</p>
-                    <Button size="sm" variant="outline" className="mt-1" onClick={() => handleAction("Apply suggested price")}>
-                      Apply
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-12">
+              <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">AI Price Suggestions</h3>
+              <p className="text-muted-foreground mb-4">Get intelligent pricing recommendations after listing your crops</p>
+              <Button variant="outline" onClick={() => handleAction("Learn about AI pricing")}>
+                Learn More
+              </Button>
             </div>
           </CardContent>
         </Card>

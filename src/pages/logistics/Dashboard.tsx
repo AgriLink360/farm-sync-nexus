@@ -34,11 +34,11 @@ const LogisticsDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Logistics Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Regional Transport</p>
+          <p className="text-muted-foreground">Welcome to your logistics portal</p>
         </div>
         <Badge variant="outline" className="bg-purple-50 border-purple-200">
           <Truck className="h-3 w-3 mr-1" />
-          Service Partner
+          New Partner
         </Badge>
       </div>
 

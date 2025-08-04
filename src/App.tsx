@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ProfileSetup from "./pages/ProfileSetup";
 import FarmerDashboard from "./pages/farmer/Dashboard";
 import BuyerDashboard from "./pages/buyer/Dashboard";
 import LogisticsDashboard from "./pages/logistics/Dashboard";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
             <Route path="/farmer" element={<ProtectedRoute requiredPortal="farmer"><Layout><FarmerDashboard /></Layout></ProtectedRoute>} />
             <Route path="/farmer/*" element={<ProtectedRoute requiredPortal="farmer"><Layout><FarmerDashboard /></Layout></ProtectedRoute>} />
             <Route path="/buyer" element={<ProtectedRoute requiredPortal="buyer"><Layout><BuyerDashboard /></Layout></ProtectedRoute>} />
