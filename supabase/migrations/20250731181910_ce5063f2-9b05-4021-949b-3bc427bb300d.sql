@@ -1,1 +1,0 @@
-UPDATE profiles SET portal_type = 'farmer' WHERE user_id = 'f9765f50-cfa0-44e2-8883-4f8e8ef68eb4';
