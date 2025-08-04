@@ -22,6 +22,7 @@ const Auth = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [newUserPortal, setNewUserPortal] = useState<'farmer' | 'buyer' | 'logistics'>('farmer');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,6 +71,10 @@ const Auth = () => {
           title: "Check your email",
           description: "We've sent you a confirmation link to complete your registration.",
         });
+        // Store portalType in localStorage for later profile update
+        localStorage.setItem('pending_portal_type', portalType);
+        // Switch to sign-in tab
+        setActiveTab('signin');
       } else if (data.user && data.session) {
         // User is automatically signed in, update profile
         const { error: profileError } = await supabase
@@ -125,7 +130,7 @@ const Auth = () => {
 
       if (data.user && data.session) {
         // Get user profile to determine portal
-        const { data: profile, error: profileError } = await supabase
+        let { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('portal_type, full_name')
           .eq('user_id', data.user.id)
@@ -141,14 +146,35 @@ const Auth = () => {
           return;
         }
 
+        // If portal_type is missing, try to update from localStorage
+        if (!profile?.portal_type) {
+          const pendingPortalType = localStorage.getItem('pending_portal_type');
+          if (pendingPortalType) {
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ portal_type: pendingPortalType })
+              .eq('user_id', data.user.id);
+            if (!updateError) {
+              localStorage.removeItem('pending_portal_type');
+              // Re-fetch profile after update
+              const { data: updatedProfile } = await supabase
+                .from('profiles')
+                .select('portal_type, full_name')
+                .eq('user_id', data.user.id)
+                .single();
+              profile = updatedProfile;
+            }
+          }
+        }
+
         if (profile?.portal_type) {
           toast({
             title: "Welcome back!",
             description: `Signed in successfully as ${profile.full_name || data.user.email}`,
           });
-          
-          // Redirect to appropriate portal
+          // Redirect to appropriate portal and force reload to ensure context is refreshed
           navigate(`/${profile.portal_type}`);
+          window.location.replace(`/${profile.portal_type}`);
         } else {
           toast({
             title: "Profile incomplete",
@@ -199,7 +225,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
