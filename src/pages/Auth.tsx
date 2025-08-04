@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Sprout, Building2, Truck, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import OnboardingTutorial from '@/components/OnboardingTutorial';
+import ForgotPassword from '@/components/ForgotPassword';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +19,9 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [portalType, setPortalType] = useState<'farmer' | 'buyer' | 'logistics'>('farmer');
   const [loading, setLoading] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [newUserPortal, setNewUserPortal] = useState<'farmer' | 'buyer' | 'logistics'>('farmer');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -86,16 +91,14 @@ const Auth = () => {
           return;
         }
 
-        // Create sample orders for the user
-        await createSampleOrders(data.user.id, portalType);
-
         toast({
           title: "Account created successfully!",
           description: "Welcome to AgriLink360!",
         });
 
-        // Redirect to appropriate portal
-        navigate(`/${portalType}`);
+        // Show tutorial for new users
+        setNewUserPortal(portalType);
+        setShowTutorial(true);
       }
     } catch (error: any) {
       toast({
@@ -165,79 +168,9 @@ const Auth = () => {
     }
   };
 
-  const createSampleOrders = async (userId: string, portal: string) => {
-    const sampleOrders = {
-      farmer: [
-        {
-          user_id: userId,
-          order_type: 'crop_listing',
-          title: 'Premium Organic Wheat - 50 tons',
-          description: 'High-quality organic wheat, freshly harvested',
-          amount: 125000.00,
-          status: 'active',
-          metadata: { crop_type: 'wheat', quantity: '50 tons', organic: true }
-        },
-        {
-          user_id: userId,
-          order_type: 'crop_listing',
-          title: 'Fresh Tomatoes - 200 kg',
-          description: 'Farm-fresh tomatoes, perfect for processing',
-          amount: 8000.00,
-          status: 'completed',
-          metadata: { crop_type: 'tomatoes', quantity: '200 kg', grade: 'A' }
-        }
-      ],
-      buyer: [
-        {
-          user_id: userId,
-          order_type: 'demand_posting',
-          title: 'Bulk Rice Purchase - 100 tons',
-          description: 'Looking for premium basmati rice for export',
-          amount: 300000.00,
-          status: 'pending',
-          metadata: { crop_type: 'rice', quantity: '100 tons', grade: 'premium' }
-        },
-        {
-          user_id: userId,
-          order_type: 'demand_posting',
-          title: 'Seasonal Vegetables - Mixed',
-          description: 'Monthly supply contract for restaurant chain',
-          amount: 75000.00,
-          status: 'active',
-          metadata: { crop_type: 'vegetables', quantity: 'mixed', contract_type: 'monthly' }
-        }
-      ],
-      logistics: [
-        {
-          user_id: userId,
-          order_type: 'logistics_booking',
-          title: 'Cold Storage Transport - Mumbai to Delhi',
-          description: 'Temperature-controlled transport for perishables',
-          amount: 25000.00,
-          status: 'completed',
-          metadata: { service_type: 'cold_transport', route: 'Mumbai-Delhi', capacity: '10 tons' }
-        },
-        {
-          user_id: userId,
-          order_type: 'logistics_booking',
-          title: 'Warehouse Storage - 3 months',
-          description: 'Grain storage facility booking',
-          amount: 45000.00,
-          status: 'active',
-          metadata: { service_type: 'storage', duration: '3 months', capacity: '500 tons' }
-        }
-      ]
-    };
-
-    const orders = sampleOrders[portal as keyof typeof sampleOrders] || [];
-    
-    for (const order of orders) {
-      try {
-        await supabase.from('orders').insert(order);
-      } catch (error) {
-        console.error('Error creating sample order:', error);
-      }
-    }
+  const handleTutorialComplete = () => {
+    setShowTutorial(false);
+    navigate(`/${newUserPortal}`);
   };
 
   return (
@@ -299,6 +232,16 @@ const Auth = () => {
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? 'Signing in...' : 'Sign In'}
                   </Button>
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm"
+                      onClick={() => setShowForgotPassword(true)}
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
               
@@ -373,6 +316,17 @@ const Auth = () => {
             </Tabs>
           </CardContent>
         </Card>
+
+        <OnboardingTutorial
+          isOpen={showTutorial}
+          onClose={handleTutorialComplete}
+          portalType={newUserPortal}
+        />
+
+        <ForgotPassword
+          isOpen={showForgotPassword}
+          onClose={() => setShowForgotPassword(false)}
+        />
       </div>
     </div>
   );
