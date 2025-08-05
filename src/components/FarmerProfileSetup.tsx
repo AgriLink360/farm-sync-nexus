@@ -24,7 +24,11 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const FarmerProfileSetup = () => {
+interface FarmerProfileSetupProps {
+  onComplete?: () => void;
+}
+
+const FarmerProfileSetup = ({ onComplete }: FarmerProfileSetupProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -166,7 +170,13 @@ const FarmerProfileSetup = () => {
         description: "Welcome to AgriLink360! Your farming journey begins now.",
       });
 
-      navigate('/farmer');
+      // Call onComplete callback if provided (for modal usage)
+      if (onComplete) {
+        onComplete();
+      } else {
+        // Navigate only if not in modal mode
+        navigate('/farmer');
+      }
     } catch (error) {
       console.error('Error creating farmer profile:', error);
       toast({

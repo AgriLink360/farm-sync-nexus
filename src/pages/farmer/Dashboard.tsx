@@ -1,10 +1,15 @@
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/useAuth"
+import { supabase } from "@/integrations/supabase/client"
 import NetworkMap from "@/components/NetworkMap"
 import AIChatbot from "@/components/AIChatbot"
 import WeatherForecast from "@/components/WeatherForecast"
+import FarmerProfileSetup from "@/components/FarmerProfileSetup"
 import { 
   Tractor, 
   Package, 
@@ -15,16 +20,54 @@ import {
   Star,
   AlertCircle,
   HandCoins,
-  Eye
+  Eye,
+  CheckCircle
 } from "lucide-react"
 
 const FarmerDashboard = () => {
   const { toast } = useToast()
+  const { user } = useAuth()
+  const [showProfileSetup, setShowProfileSetup] = useState(false)
+  const [hasCompletedProfile, setHasCompletedProfile] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    checkFarmerProfile()
+  }, [user])
+
+  const checkFarmerProfile = async () => {
+    if (!user) return
+    
+    try {
+      const { data, error } = await supabase
+        .from('farmer_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+      
+      if (data && !error) {
+        setHasCompletedProfile(true)
+      }
+    } catch (error) {
+      console.log('No farmer profile found')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleAction = (action: string) => {
     toast({
       title: "Feature Coming Soon",
       description: `${action} feature is being developed. You'll be notified when it's ready!`,
+    })
+  }
+
+  const handleProfileSetupComplete = () => {
+    setShowProfileSetup(false)
+    setHasCompletedProfile(true)
+    toast({
+      title: "Profile Setup Complete! 🌾",
+      description: "Your farmer profile has been successfully created.",
     })
   }
 
@@ -51,12 +94,27 @@ const FarmerDashboard = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">Complete your profile to build your Agri-ID</p>
-            <Button onClick={() => handleAction("Complete profile")}>
-              Complete Profile Setup
-            </Button>
-          </div>
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Loading profile status...</p>
+            </div>
+          ) : hasCompletedProfile ? (
+            <div className="text-center py-8">
+              <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <p className="text-green-800 font-medium mb-2">Agri-ID Profile Completed! 🌾</p>
+              <p className="text-muted-foreground mb-4">Your farmer profile is verified and active</p>
+              <Button variant="outline" onClick={() => setShowProfileSetup(true)}>
+                View/Edit Profile
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">Complete your profile to build your Agri-ID</p>
+              <Button onClick={() => setShowProfileSetup(true)}>
+                Complete Profile Setup
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -264,6 +322,13 @@ const FarmerDashboard = () => {
 
       {/* AI Chatbot */}
       <AIChatbot userType="farmer" />
+
+      {/* Profile Setup Dialog */}
+      <Dialog open={showProfileSetup} onOpenChange={setShowProfileSetup}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+          <FarmerProfileSetup onComplete={handleProfileSetupComplete} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
