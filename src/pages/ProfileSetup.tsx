@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import OnboardingTutorial from '@/components/OnboardingTutorial';
+import FarmerProfileSetup from '@/components/FarmerProfileSetup';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -233,6 +234,11 @@ const ProfileSetup = () => {
   if (profile?.portal_type) {
     navigate(`/${profile.portal_type}`);
     return null;
+  }
+
+  // If farmer is selected, show the detailed farmer profile setup
+  if (formData.portal_type === 'farmer') {
+    return <FarmerProfileSetup />;
   }
 
   return (

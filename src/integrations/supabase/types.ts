@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      farmer_profiles: {
+        Row: {
+          annual_production_tons: number | null
+          certifications: string[] | null
+          created_at: string
+          district: string | null
+          equipment_owned: string[] | null
+          experience_years: number | null
+          farm_size_acres: number | null
+          farming_methods: string[] | null
+          id: string
+          irrigation_type: string | null
+          preferred_market_channels: string[] | null
+          primary_crops: string[] | null
+          profile_id: string
+          region: string | null
+          secondary_crops: string[] | null
+          soil_type: string | null
+          state: string | null
+          storage_capacity_tons: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_production_tons?: number | null
+          certifications?: string[] | null
+          created_at?: string
+          district?: string | null
+          equipment_owned?: string[] | null
+          experience_years?: number | null
+          farm_size_acres?: number | null
+          farming_methods?: string[] | null
+          id?: string
+          irrigation_type?: string | null
+          preferred_market_channels?: string[] | null
+          primary_crops?: string[] | null
+          profile_id: string
+          region?: string | null
+          secondary_crops?: string[] | null
+          soil_type?: string | null
+          state?: string | null
+          storage_capacity_tons?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_production_tons?: number | null
+          certifications?: string[] | null
+          created_at?: string
+          district?: string | null
+          equipment_owned?: string[] | null
+          experience_years?: number | null
+          farm_size_acres?: number | null
+          farming_methods?: string[] | null
+          id?: string
+          irrigation_type?: string | null
+          preferred_market_channels?: string[] | null
+          primary_crops?: string[] | null
+          profile_id?: string
+          region?: string | null
+          secondary_crops?: string[] | null
+          soil_type?: string | null
+          state?: string | null
+          storage_capacity_tons?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farmer_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           amount: number | null
@@ -55,28 +132,40 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bio: string | null
           created_at: string
           email: string
           full_name: string | null
           id: string
+          location: string | null
+          metadata: Json | null
+          phone: string | null
           portal_type: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          bio?: string | null
           created_at?: string
           email: string
           full_name?: string | null
           id?: string
+          location?: string | null
+          metadata?: Json | null
+          phone?: string | null
           portal_type?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          bio?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
           id?: string
+          location?: string | null
+          metadata?: Json | null
+          phone?: string | null
           portal_type?: string | null
           updated_at?: string
           user_id?: string
