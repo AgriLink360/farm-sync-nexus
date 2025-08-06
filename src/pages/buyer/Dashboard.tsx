@@ -1,9 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import NetworkMap from "@/components/NetworkMap"
 import AIChatbot from "@/components/AIChatbot"
+import BuyerProfileSetup from "@/components/BuyerProfileSetup"
+import { useState } from "react"
 import { 
   Building2, 
   ShoppingCart, 
@@ -20,8 +23,13 @@ import {
 
 const BuyerDashboard = () => {
   const { toast } = useToast()
+  const [showProfileSetup, setShowProfileSetup] = useState(false)
 
   const handleAction = (action: string) => {
+    if (action === "Complete Profile Setup") {
+      setShowProfileSetup(true)
+      return
+    }
     toast({
       title: "Feature Coming Soon",
       description: `${action} feature is being developed. You'll be notified when it's ready!`,
@@ -64,6 +72,11 @@ const BuyerDashboard = () => {
               <p className="text-sm text-muted-foreground">Trust Score</p>
               <p className="font-medium text-blue-600">4.9/5.0</p>
             </div>
+          </div>
+          <div className="mt-4">
+            <Button onClick={() => handleAction("Complete Profile Setup")}>
+              Complete Profile Setup
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -320,6 +333,13 @@ const BuyerDashboard = () => {
 
       {/* AI Chatbot */}
       <AIChatbot userType="buyer" />
+
+      {/* Profile Setup Dialog */}
+      <Dialog open={showProfileSetup} onOpenChange={setShowProfileSetup}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <BuyerProfileSetup mode="edit" onClose={() => setShowProfileSetup(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

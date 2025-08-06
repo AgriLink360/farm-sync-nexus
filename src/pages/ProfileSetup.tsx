@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import OnboardingTutorial from '@/components/OnboardingTutorial';
 import FarmerProfileSetup from '@/components/FarmerProfileSetup';
+import BuyerProfileSetup from '@/components/BuyerProfileSetup';
+import LogisticsProfileSetup from '@/components/LogisticsProfileSetup';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -236,9 +238,17 @@ const ProfileSetup = () => {
     return null;
   }
 
-  // If farmer is selected, show the detailed farmer profile setup
+  // If specific portal type is selected, show the detailed profile setup
   if (formData.portal_type === 'farmer') {
     return <FarmerProfileSetup />;
+  }
+  
+  if (formData.portal_type === 'buyer') {
+    return <BuyerProfileSetup />;
+  }
+  
+  if (formData.portal_type === 'logistics') {
+    return <LogisticsProfileSetup />;
   }
 
   return (

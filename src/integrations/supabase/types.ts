@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      buyer_profiles: {
+        Row: {
+          address: string
+          business_registration_no: string | null
+          buyer_type: string
+          buying_interests: string[] | null
+          company_type: string | null
+          contact_person_name: string
+          created_at: string
+          email: string
+          gst_number: string | null
+          id: string
+          location: string
+          phone_primary: string
+          phone_secondary: string | null
+          profile_id: string
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          address: string
+          business_registration_no?: string | null
+          buyer_type: string
+          buying_interests?: string[] | null
+          company_type?: string | null
+          contact_person_name: string
+          created_at?: string
+          email: string
+          gst_number?: string | null
+          id?: string
+          location: string
+          phone_primary: string
+          phone_secondary?: string | null
+          profile_id: string
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string
+          business_registration_no?: string | null
+          buyer_type?: string
+          buying_interests?: string[] | null
+          company_type?: string | null
+          contact_person_name?: string
+          created_at?: string
+          email?: string
+          gst_number?: string | null
+          id?: string
+          location?: string
+          phone_primary?: string
+          phone_secondary?: string | null
+          profile_id?: string
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       farmer_profiles: {
         Row: {
           annual_production_tons: number | null
@@ -90,6 +150,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      logistics_profiles: {
+        Row: {
+          address: string
+          business_registration_licence: string
+          company_name: string
+          contact_person: string
+          created_at: string
+          email: string
+          fleet_details: Json | null
+          id: string
+          location: string
+          operating_hours: string | null
+          phone_primary: string
+          phone_secondary: string | null
+          profile_id: string
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          address: string
+          business_registration_licence: string
+          company_name: string
+          contact_person: string
+          created_at?: string
+          email: string
+          fleet_details?: Json | null
+          id?: string
+          location: string
+          operating_hours?: string | null
+          phone_primary: string
+          phone_secondary?: string | null
+          profile_id: string
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string
+          business_registration_licence?: string
+          company_name?: string
+          contact_person?: string
+          created_at?: string
+          email?: string
+          fleet_details?: Json | null
+          id?: string
+          location?: string
+          operating_hours?: string | null
+          phone_primary?: string
+          phone_secondary?: string | null
+          profile_id?: string
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
       }
       orders: {
         Row: {
