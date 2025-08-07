@@ -12,6 +12,7 @@ import { User, Sprout, Building2, Truck, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import OnboardingTutorial from '@/components/OnboardingTutorial';
 import ForgotPassword from '@/components/ForgotPassword';
+import PasswordReset from '@/components/PasswordReset';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ const Auth = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [newUserPortal, setNewUserPortal] = useState<'farmer' | 'buyer' | 'logistics'>('farmer');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const navigate = useNavigate();
 
@@ -50,6 +52,24 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Check if user already exists with different portal
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('portal_type')
+        .eq('email', email)
+        .single();
+
+      if (existingProfile) {
+        toast({
+          title: "User already exists",
+          description: `You already have an account with ${existingProfile.portal_type} portal. Please sign in instead.`,
+          variant: "destructive",
+        });
+        setActiveTab('signin');
+        setLoading(false);
+        return;
+      }
+
       const redirectUrl = `${window.location.origin}/auth`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -121,6 +141,24 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // First check if user exists in our profiles table
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('portal_type')
+        .eq('email', email)
+        .single();
+
+      if (!existingProfile) {
+        toast({
+          title: "User not found",
+          description: "You are a new user. Please sign up first to create your account.",
+          variant: "destructive",
+        });
+        setActiveTab('signup');
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -263,7 +301,7 @@ const Auth = () => {
                       type="button"
                       variant="link"
                       className="text-sm"
-                      onClick={() => setShowForgotPassword(true)}
+                      onClick={() => setShowPasswordReset(true)}
                     >
                       Forgot your password?
                     </Button>
@@ -352,6 +390,11 @@ const Auth = () => {
         <ForgotPassword
           isOpen={showForgotPassword}
           onClose={() => setShowForgotPassword(false)}
+        />
+
+        <PasswordReset
+          isOpen={showPasswordReset}
+          onClose={() => setShowPasswordReset(false)}
         />
       </div>
     </div>
