@@ -6,9 +6,11 @@ import { supabase } from '@/integrations/supabase/client';
 interface Profile {
   id: string;
   user_id: string;
-  email: string;
   full_name?: string;
   portal_type?: 'farmer' | 'buyer' | 'logistics';
+  phone?: string;
+  bio?: string;
+  location?: string;
   created_at: string;
   updated_at: string;
 }

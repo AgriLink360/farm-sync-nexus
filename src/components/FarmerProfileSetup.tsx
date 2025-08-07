@@ -111,63 +111,10 @@ const FarmerProfileSetup = ({ onComplete }: FarmerProfileSetupProps) => {
     if (!user) return;
 
     try {
-      // First, get the basic profile data
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Then, get the farmer profile data
-      const { data: farmerProfile, error: farmerProfileError } = await supabase
-        .from('farmer_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      // If farmer profile exists, populate the form
-      if (farmerProfile && !farmerProfileError) {
-        setIsEditMode(true);
-        setFormData({
-          // Basic info from profiles table
-          full_name: profile?.full_name || '',
-          phone: profile?.phone || '',
-          bio: profile?.bio || '',
-          
-          // Location
-          region: farmerProfile.region || '',
-          district: farmerProfile.district || '',
-          state: farmerProfile.state || '',
-          
-          // Farm details
-          experience_years: farmerProfile.experience_years?.toString() || '',
-          farm_size_acres: farmerProfile.farm_size_acres?.toString() || '',
-          primary_crops: farmerProfile.primary_crops || [],
-          secondary_crops: farmerProfile.secondary_crops || [],
-          farming_methods: farmerProfile.farming_methods || [],
-          irrigation_type: farmerProfile.irrigation_type || '',
-          soil_type: farmerProfile.soil_type || '',
-          
-          // Equipment & Capacity
-          equipment_owned: farmerProfile.equipment_owned || [],
-          storage_capacity_tons: farmerProfile.storage_capacity_tons?.toString() || '',
-          annual_production_tons: farmerProfile.annual_production_tons?.toString() || '',
-          
-          // Certifications & Market
-          certifications: farmerProfile.certifications || [],
-          preferred_market_channels: farmerProfile.preferred_market_channels || []
-        });
-      } else if (profile) {
-        // Only basic profile exists, populate basic info
-        setFormData(prev => ({
-          ...prev,
-          full_name: profile.full_name || '',
-          phone: profile.phone || '',
-          bio: profile.bio || ''
-        }));
-      }
+      // Note: farmer_profiles table doesn't exist yet - this is a placeholder
+      // The farmer profile functionality would need to be implemented separately
+      console.log('Farmer profile loading not implemented yet');
+      return;
     } catch (error) {
       console.log('No existing profile found or error loading profile:', error);
     }
@@ -188,70 +135,12 @@ const FarmerProfileSetup = ({ onComplete }: FarmerProfileSetupProps) => {
     setLoading(true);
 
     try {
-      // First, update the basic profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          location: `${formData.district}, ${formData.state}`,
-          bio: formData.bio,
-          portal_type: 'farmer'
-        })
-        .eq('user_id', user?.id);
-
-      if (profileError) throw profileError;
-
-      // Get profile ID
-      const { data: profileData, error: profileFetchError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (profileFetchError) throw profileFetchError;
-
-      // Create or update detailed farmer profile
-      const farmerProfileData = {
-        user_id: user?.id,
-        profile_id: profileData.id,
-        experience_years: formData.experience_years ? parseInt(formData.experience_years) : null,
-        farm_size_acres: formData.farm_size_acres ? parseFloat(formData.farm_size_acres) : null,
-        primary_crops: formData.primary_crops,
-        secondary_crops: formData.secondary_crops,
-        farming_methods: formData.farming_methods,
-        region: formData.region,
-        district: formData.district,
-        state: formData.state,
-        irrigation_type: formData.irrigation_type,
-        soil_type: formData.soil_type,
-        equipment_owned: formData.equipment_owned,
-        storage_capacity_tons: formData.storage_capacity_tons ? parseFloat(formData.storage_capacity_tons) : null,
-        annual_production_tons: formData.annual_production_tons ? parseFloat(formData.annual_production_tons) : null,
-        certifications: formData.certifications,
-        preferred_market_channels: formData.preferred_market_channels
-      };
-
-      if (isEditMode) {
-        // Update existing farmer profile
-        const { error: farmerProfileError } = await supabase
-          .from('farmer_profiles')
-          .update(farmerProfileData)
-          .eq('user_id', user?.id);
-
-        if (farmerProfileError) throw farmerProfileError;
-      } else {
-        // Create new farmer profile
-        const { error: farmerProfileError } = await supabase
-          .from('farmer_profiles')
-          .insert(farmerProfileData);
-
-        if (farmerProfileError) throw farmerProfileError;
-      }
-
+      // Note: This is a placeholder implementation since farmer_profiles table doesn't exist yet
+      console.log('Farmer profile form data:', formData);
+      
       toast({
-        title: isEditMode ? "Profile Updated! 🌾" : "Profile Setup Complete! 🌾",
-        description: isEditMode ? "Your farmer profile has been successfully updated." : "Welcome to AgriLink360! Your farming journey begins now.",
+        title: "Feature Coming Soon! 🌾",
+        description: "Farmer profile setup will be available soon. Currently setting up buyer and logistics profiles.",
       });
 
       // Call onComplete callback if provided (for modal usage)
@@ -259,7 +148,7 @@ const FarmerProfileSetup = ({ onComplete }: FarmerProfileSetupProps) => {
         onComplete();
       } else {
         // Navigate only if not in modal mode
-        navigate('/farmer');
+        navigate('/');
       }
     } catch (error) {
       console.error('Error creating farmer profile:', error);

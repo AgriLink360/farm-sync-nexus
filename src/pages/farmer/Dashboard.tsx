@@ -39,15 +39,10 @@ const FarmerDashboard = () => {
     if (!user) return
     
     try {
-      const { data, error } = await supabase
-        .from('farmer_profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-      
-      if (data && !error) {
-        setHasCompletedProfile(true)
-      }
+      // Note: farmer_profiles table doesn't exist yet - this is a placeholder
+      // For now, assume farmer profiles are not complete
+      console.log('Farmer profile check not implemented yet');
+      setHasCompletedProfile(false);
     } catch (error) {
       console.log('No farmer profile found')
     } finally {

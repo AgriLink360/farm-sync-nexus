@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -19,7 +19,7 @@ export type Database = {
           address: string
           business_registration_no: string | null
           buyer_type: string
-          buying_interests: string[] | null
+          buying_interests: string[]
           company_type: string | null
           contact_person_name: string
           created_at: string
@@ -38,7 +38,7 @@ export type Database = {
           address: string
           business_registration_no?: string | null
           buyer_type: string
-          buying_interests?: string[] | null
+          buying_interests?: string[]
           company_type?: string | null
           contact_person_name: string
           created_at?: string
@@ -57,7 +57,7 @@ export type Database = {
           address?: string
           business_registration_no?: string | null
           buyer_type?: string
-          buying_interests?: string[] | null
+          buying_interests?: string[]
           company_type?: string | null
           contact_person_name?: string
           created_at?: string
@@ -74,83 +74,6 @@ export type Database = {
         }
         Relationships: []
       }
-      farmer_profiles: {
-        Row: {
-          annual_production_tons: number | null
-          certifications: string[] | null
-          created_at: string
-          district: string | null
-          equipment_owned: string[] | null
-          experience_years: number | null
-          farm_size_acres: number | null
-          farming_methods: string[] | null
-          id: string
-          irrigation_type: string | null
-          preferred_market_channels: string[] | null
-          primary_crops: string[] | null
-          profile_id: string
-          region: string | null
-          secondary_crops: string[] | null
-          soil_type: string | null
-          state: string | null
-          storage_capacity_tons: number | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          annual_production_tons?: number | null
-          certifications?: string[] | null
-          created_at?: string
-          district?: string | null
-          equipment_owned?: string[] | null
-          experience_years?: number | null
-          farm_size_acres?: number | null
-          farming_methods?: string[] | null
-          id?: string
-          irrigation_type?: string | null
-          preferred_market_channels?: string[] | null
-          primary_crops?: string[] | null
-          profile_id: string
-          region?: string | null
-          secondary_crops?: string[] | null
-          soil_type?: string | null
-          state?: string | null
-          storage_capacity_tons?: number | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          annual_production_tons?: number | null
-          certifications?: string[] | null
-          created_at?: string
-          district?: string | null
-          equipment_owned?: string[] | null
-          experience_years?: number | null
-          farm_size_acres?: number | null
-          farming_methods?: string[] | null
-          id?: string
-          irrigation_type?: string | null
-          preferred_market_channels?: string[] | null
-          primary_crops?: string[] | null
-          profile_id?: string
-          region?: string | null
-          secondary_crops?: string[] | null
-          soil_type?: string | null
-          state?: string | null
-          storage_capacity_tons?: number | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "farmer_profiles_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       logistics_profiles: {
         Row: {
           address: string
@@ -159,10 +82,10 @@ export type Database = {
           contact_person: string
           created_at: string
           email: string
-          fleet_details: Json | null
+          fleet_details: Json
           id: string
           location: string
-          operating_hours: string | null
+          operating_hours: string
           phone_primary: string
           phone_secondary: string | null
           profile_id: string
@@ -177,10 +100,10 @@ export type Database = {
           contact_person: string
           created_at?: string
           email: string
-          fleet_details?: Json | null
+          fleet_details?: Json
           id?: string
           location: string
-          operating_hours?: string | null
+          operating_hours: string
           phone_primary: string
           phone_secondary?: string | null
           profile_id: string
@@ -195,10 +118,10 @@ export type Database = {
           contact_person?: string
           created_at?: string
           email?: string
-          fleet_details?: Json | null
+          fleet_details?: Json
           id?: string
           location?: string
-          operating_hours?: string | null
+          operating_hours?: string
           phone_primary?: string
           phone_secondary?: string | null
           profile_id?: string
@@ -208,54 +131,13 @@ export type Database = {
         }
         Relationships: []
       }
-      orders: {
-        Row: {
-          amount: number | null
-          created_at: string
-          description: string | null
-          id: string
-          metadata: Json | null
-          order_type: string
-          status: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          order_type: string
-          status?: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          amount?: number | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          order_type?: string
-          status?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           bio: string | null
           created_at: string
-          email: string
           full_name: string | null
           id: string
           location: string | null
-          metadata: Json | null
           phone: string | null
           portal_type: string | null
           updated_at: string
@@ -264,11 +146,9 @@ export type Database = {
         Insert: {
           bio?: string | null
           created_at?: string
-          email: string
           full_name?: string | null
           id?: string
           location?: string | null
-          metadata?: Json | null
           phone?: string | null
           portal_type?: string | null
           updated_at?: string
@@ -277,11 +157,9 @@ export type Database = {
         Update: {
           bio?: string | null
           created_at?: string
-          email?: string
           full_name?: string | null
           id?: string
           location?: string | null
-          metadata?: Json | null
           phone?: string | null
           portal_type?: string | null
           updated_at?: string
