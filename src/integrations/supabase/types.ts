@@ -74,6 +74,84 @@ export type Database = {
         }
         Relationships: []
       }
+      farmer_profiles: {
+        Row: {
+          annual_production_tons: number | null
+          bio: string | null
+          certifications: string[]
+          created_at: string
+          district: string | null
+          equipment_owned: string[]
+          experience_years: number | null
+          farm_size_acres: number | null
+          farming_methods: string[]
+          full_name: string
+          id: string
+          irrigation_type: string | null
+          phone: string | null
+          preferred_market_channels: string[]
+          primary_crops: string[]
+          profile_id: string
+          region: string
+          secondary_crops: string[]
+          soil_type: string | null
+          state: string | null
+          storage_capacity_tons: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_production_tons?: number | null
+          bio?: string | null
+          certifications?: string[]
+          created_at?: string
+          district?: string | null
+          equipment_owned?: string[]
+          experience_years?: number | null
+          farm_size_acres?: number | null
+          farming_methods?: string[]
+          full_name: string
+          id?: string
+          irrigation_type?: string | null
+          phone?: string | null
+          preferred_market_channels?: string[]
+          primary_crops?: string[]
+          profile_id: string
+          region: string
+          secondary_crops?: string[]
+          soil_type?: string | null
+          state?: string | null
+          storage_capacity_tons?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_production_tons?: number | null
+          bio?: string | null
+          certifications?: string[]
+          created_at?: string
+          district?: string | null
+          equipment_owned?: string[]
+          experience_years?: number | null
+          farm_size_acres?: number | null
+          farming_methods?: string[]
+          full_name?: string
+          id?: string
+          irrigation_type?: string | null
+          phone?: string | null
+          preferred_market_channels?: string[]
+          primary_crops?: string[]
+          profile_id?: string
+          region?: string
+          secondary_crops?: string[]
+          soil_type?: string | null
+          state?: string | null
+          storage_capacity_tons?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       logistics_profiles: {
         Row: {
           address: string
