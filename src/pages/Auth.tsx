@@ -126,11 +126,20 @@ const Auth = () => {
         setShowTutorial(true);
       }
     } catch (error: any) {
-      toast({
-        title: "Sign up failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      const msg = String(error?.message || '').toLowerCase();
+      if (msg.includes('already') || msg.includes('exists') || (error && error.status === 422)) {
+        toast({
+          title: "Account already exists",
+          description: "Please sign in with your credentials instead.",
+        });
+        setActiveTab('signin');
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -141,22 +150,22 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // First check if user exists in our profiles table
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('portal_type')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (!existingProfile) {
-        toast({
-          title: "User not found",
-          description: "You are a new user. Please sign up first to create your account.",
-          variant: "destructive",
+      // Clean up any stale auth state before sign in
+      try {
+        // Remove all Supabase auth keys from storage
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            localStorage.removeItem(key);
+          }
         });
-        setActiveTab('signup');
-        setLoading(false);
-        return;
+        Object.keys(sessionStorage || {}).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (_) {
+        // ignore cleanup errors
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -168,13 +177,37 @@ const Auth = () => {
 
       if (data.user && data.session) {
         // Get user profile to determine portal
-        let { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('portal_type, full_name')
-          .eq('user_id', data.user.id)
-          .maybeSingle();
+      let { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('portal_type, full_name')
+        .eq('user_id', data.user.id)
+        .maybeSingle();
 
-        if (profileError) {
+      // If profile is missing, create it now from auth metadata
+      if (!profile) {
+        const meta = (data.user as any).user_metadata || {};
+        const portal = meta.portal_type || localStorage.getItem('pending_portal_type') || null;
+        const full = meta.full_name || null;
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert({
+            user_id: data.user.id,
+            email: data.user.email!,
+            portal_type: portal,
+            full_name: full,
+          });
+        if (!upsertError) {
+          if (portal) localStorage.removeItem('pending_portal_type');
+          const { data: updatedProfile } = await supabase
+            .from('profiles')
+            .select('portal_type, full_name')
+            .eq('user_id', data.user.id)
+            .maybeSingle();
+          profile = updatedProfile;
+        }
+      }
+
+      if (profileError) {
           console.error('Profile fetch error:', profileError);
           toast({
             title: "Profile error",
@@ -216,9 +249,9 @@ const Auth = () => {
         } else {
           toast({
             title: "Profile incomplete",
-            description: "Your portal type is not set. Please contact support.",
-            variant: "destructive",
+            description: "Please complete your profile setup to continue.",
           });
+          navigate('/profile-setup');
         }
       }
     } catch (error: any) {
