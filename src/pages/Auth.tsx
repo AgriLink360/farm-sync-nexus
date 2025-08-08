@@ -38,9 +38,32 @@ const Auth = () => {
           .select('portal_type')
           .eq('user_id', session.user.id)
           .maybeSingle();
+
+        if (!profile) {
+          const meta: any = (session.user as any).user_metadata || {};
+          const portal = meta.portal_type || localStorage.getItem('pending_portal_type');
+          const full = meta.full_name || '';
+          if (portal) {
+            try {
+              await supabase.from('profiles').upsert({
+                user_id: session.user.id,
+                email: session.user.email!,
+                portal_type: portal,
+                full_name: full,
+              });
+              localStorage.removeItem('pending_portal_type');
+            } catch {}
+          }
+        }
+
+        const { data: refreshed } = await supabase
+          .from('profiles')
+          .select('portal_type')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
         
-        if (profile?.portal_type) {
-          navigate(`/${profile.portal_type}`);
+        if (refreshed?.portal_type) {
+          navigate(`/${refreshed.portal_type}`);
         }
       }
     };
@@ -52,23 +75,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Check if user already exists with different portal
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('portal_type')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (existingProfile) {
-        toast({
-          title: "User already exists",
-          description: `You already have an account with ${existingProfile.portal_type} portal. Please sign in instead.`,
-          variant: "destructive",
-        });
-        setActiveTab('signin');
-        setLoading(false);
-        return;
-      }
 
       const redirectUrl = `${window.location.origin}/auth`;
       
@@ -96,31 +102,12 @@ const Auth = () => {
         // Switch to sign-in tab
         setActiveTab('signin');
       } else if (data.user && data.session) {
-        // User is automatically signed in, update profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({ 
-            user_id: data.user.id,
-            email: data.user.email!,
-            portal_type: portalType,
-            full_name: fullName 
-          });
-
-        if (profileError) {
-          console.error('Profile error:', profileError);
-          toast({
-            title: "Profile setup failed",
-            description: "There was an issue setting up your profile. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-
         toast({
           title: "Account created successfully!",
           description: "Welcome to AgriLink360!",
         });
-
+        // Persist chosen portal for profile creation after redirect if needed
+        localStorage.setItem('pending_portal_type', portalType);
         // Show tutorial for new users
         setNewUserPortal(portalType);
         setShowTutorial(true);
