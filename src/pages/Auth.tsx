@@ -37,7 +37,7 @@ const Auth = () => {
           .from('profiles')
           .select('portal_type')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
         
         if (profile?.portal_type) {
           navigate(`/${profile.portal_type}`);
@@ -57,7 +57,7 @@ const Auth = () => {
         .from('profiles')
         .select('portal_type')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (existingProfile) {
         toast({
@@ -146,7 +146,7 @@ const Auth = () => {
         .from('profiles')
         .select('portal_type')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (!existingProfile) {
         toast({
@@ -172,7 +172,7 @@ const Auth = () => {
           .from('profiles')
           .select('portal_type, full_name')
           .eq('user_id', data.user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error('Profile fetch error:', profileError);
@@ -199,7 +199,7 @@ const Auth = () => {
                 .from('profiles')
                 .select('portal_type, full_name')
                 .eq('user_id', data.user.id)
-                .single();
+                .maybeSingle();
               profile = updatedProfile;
             }
           }

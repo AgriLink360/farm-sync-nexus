@@ -213,6 +213,7 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string
+          email: string
           full_name: string | null
           id: string
           location: string | null
@@ -224,6 +225,7 @@ export type Database = {
         Insert: {
           bio?: string | null
           created_at?: string
+          email: string
           full_name?: string | null
           id?: string
           location?: string | null
@@ -235,6 +237,7 @@ export type Database = {
         Update: {
           bio?: string | null
           created_at?: string
+          email?: string
           full_name?: string | null
           id?: string
           location?: string | null

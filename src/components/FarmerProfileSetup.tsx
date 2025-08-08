@@ -181,6 +181,7 @@ const FarmerProfileSetup = ({ onComplete }: FarmerProfileSetupProps) => {
           .from('profiles')
           .insert({
             user_id: user?.id,
+            email: user?.email as string,
             full_name: formData.full_name,
             phone: formData.phone,
             bio: formData.bio,
@@ -197,6 +198,7 @@ const FarmerProfileSetup = ({ onComplete }: FarmerProfileSetupProps) => {
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
+            email: user?.email as string,
             full_name: formData.full_name,
             phone: formData.phone,
             bio: formData.bio,
